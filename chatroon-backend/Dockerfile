@@ -1,4 +1,4 @@
-FROM registry.c2cloud.cn/ynfgs/eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:17-jdk-alpine
 ENV TZ=Asia/Shanghai
 VOLUME /tmp
 ARG JAR_FILE

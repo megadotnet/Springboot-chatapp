@@ -3,6 +3,7 @@ package com.chatroomserver.chatroonbackend.controller;
 import com.chatroomserver.chatroonbackend.model.Message;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -11,20 +12,36 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+// 使用Spring的Websocket和MVC功能实现消息控制器
 @RestController
+// 使用AllArgsConstructor注解自动生成所有成员变量的构造函数
 @AllArgsConstructor
+@Slf4j
 public class ChatController {
 
+    // 用于发送消息的模板
     private SimpMessagingTemplate simpMessagingTemplate;
 
-
+    /**
+     * 接收并处理发往"/message"的STOMP消息
+     * 将接收到的消息打印到控制台，并将其重新发送到"/chatroom/public"通道
+     * @param message 接收到的消息体
+     * @return 返回接收到的消息
+     * @throws InterruptedException 如果线程被中断
+     */
     @MessageMapping("/message")
     @SendTo("/chatroom/public")
     public Message receiveMessage(@RequestBody Message message) throws InterruptedException {
-        System.out.println(message);
+        log.info(message.getMessage());
         return message;
     }
 
+    /**
+     * 处理发往"/private-message"的STOMP消息
+     * 将接收到的消息发送给指定的接收者
+     * @param message 接收到的消息体
+     * @return 返回接收到的消息
+     */
     @MessageMapping("/private-message")
     public Message privateMessage(@RequestBody Message message){
         simpMessagingTemplate.convertAndSendToUser(message.getReceiverName(),"/private",message);

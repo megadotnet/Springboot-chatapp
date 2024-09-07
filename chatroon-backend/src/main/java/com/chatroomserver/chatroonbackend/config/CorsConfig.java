@@ -1,4 +1,4 @@
-package com.chinacreator.c2.config;
+package com.chatroomserver.chatroonbackend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @Date 2023/4/14 17:47
  **/
 @Configuration
-
 public class CorsConfig implements WebMvcConfigurer {
 
     @Bean

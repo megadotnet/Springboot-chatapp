@@ -19,26 +19,6 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>com.chinacreator.c2</groupId>
-			<artifactId>c2-runtimex-spring-boot-starter</artifactId>
-			<version>1.0.1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>tomcat-jsp-api</artifactId>
-					<groupId>org.apache.tomcat</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>tomcat-embed-jasper</artifactId>
-					<groupId>org.apache.tomcat.embed</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-undertow</artifactId>
 			<exclusions>
@@ -50,11 +30,6 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>com.chinacreator.c2</groupId>
-			<artifactId>c2-sso-client-java</artifactId>
-			<version>4.0.1.4</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

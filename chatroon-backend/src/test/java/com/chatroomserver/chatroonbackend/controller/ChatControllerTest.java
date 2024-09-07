@@ -1,6 +1,7 @@
 package com.chatroomserver.chatroonbackend.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.USER_HEADER;
 
@@ -80,7 +81,7 @@ public class ChatControllerTest {
     @Test
     public void testPrivateMessage() throws Exception {
         Message message = new Message();
-        message.setMessage("This is test");
+        message.setMessage("This is testPrivateMessage");
         message.setSenderName("User2");
         message.setReceiverName("User1");
         // Connect to the WebSocket server on the dynamically assigned port
@@ -94,6 +95,6 @@ public class ChatControllerTest {
         session.send("/app/private-message", jsonMessage.getBytes()); // Send as byte array
 
         // Verify that the private message was sent to the correct user
-        //verify(simpMessagingTemplate).convertAndSendToUser(any(String.class), "/private", message);
+        //verify(simpMessagingTemplate).convertAndSendToUser(eq(message.getMessage()), "/private", message.getMessage());
     }
 }

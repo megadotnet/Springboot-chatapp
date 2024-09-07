@@ -1,13 +1,17 @@
 package com.chatroomserver.chatroonbackend.controller;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.USER_HEADER;
 
+
 import com.chatroomserver.chatroonbackend.model.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompFrameHandler;
+import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -28,8 +36,14 @@ import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+
+import static org.awaitility.Awaitility.await;
 
 /**
  * Unit tests for the ChatController class.
@@ -42,7 +56,7 @@ public class ChatControllerTest {
     private SimpMessagingTemplate simpMessagingTemplate;
 
 
-    private WebSocketStompClient stompClient;
+    private WebSocketStompClient webSocketStompClient;
 
     @LocalServerPort // Inject the port number
     private int port;
@@ -53,7 +67,7 @@ public class ChatControllerTest {
     public void setup() {
         // Initialize the WebSocketStompClient
         List<Transport> transports = Collections.singletonList(new WebSocketTransport(new StandardWebSocketClient()));
-        stompClient = new WebSocketStompClient(new SockJsClient(transports));
+        webSocketStompClient = new WebSocketStompClient(new SockJsClient(transports));
         objectMapper = new ObjectMapper(); // Initialize ObjectMapper
     }
     @Test
@@ -65,7 +79,7 @@ public class ChatControllerTest {
 
         // Connect to the WebSocket server on the dynamically assigned port
         String url = "ws://localhost:" + port + "/ws";
-        StompSession session = stompClient.connect(url, new StompSessionHandlerAdapter() {}).get();
+        StompSession session = webSocketStompClient.connect(url, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
 
         // Convert the Message object to JSON
         String jsonMessage = objectMapper.writeValueAsString(message);
@@ -86,7 +100,7 @@ public class ChatControllerTest {
         message.setReceiverName("User1");
         // Connect to the WebSocket server on the dynamically assigned port
         String url = "ws://localhost:" + port + "/ws";
-        StompSession session = stompClient.connect(url, new StompSessionHandlerAdapter() {}).get();
+        StompSession session = webSocketStompClient.connect(url, new StompSessionHandlerAdapter() {}).get();
 
         // Convert the Message object to JSON
         String jsonMessage = objectMapper.writeValueAsString(message);
@@ -96,5 +110,66 @@ public class ChatControllerTest {
 
         // Verify that the private message was sent to the correct user
         //verify(simpMessagingTemplate).convertAndSendToUser(eq(message.getMessage()), "/private", message.getMessage());
+    }
+
+    @Test
+    @Disabled
+    public void verifyGreetingIsReceived() throws Exception {
+
+        BlockingQueue<String> blockingQueue = new ArrayBlockingQueue<>(1);
+
+        webSocketStompClient.setMessageConverter(new StringMessageConverter());
+        String url = "ws://localhost:" + port + "/ws";
+        StompSession session = webSocketStompClient
+                .connect(url, new StompSessionHandlerAdapter() {})
+                .get(1, SECONDS);
+
+        session.subscribe("/app/message", new StompFrameHandler() {
+
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return String.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                blockingQueue.add((String) payload);
+            }
+        });
+
+        session.send("/chatroom/public", "Mike");
+
+        await().atMost(1, SECONDS)
+                .untilAsserted(() -> assertEquals("Hello, Mike!", blockingQueue.poll()));
+    }
+
+    @Test
+    void verifyWelcomeMessageIsSent() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
+        String url = "ws://localhost:" + port + "/ws";
+
+        StompSession session = webSocketStompClient
+                .connect(url, new StompSessionHandlerAdapter() {
+                })
+                .get(1, SECONDS);
+
+        session.subscribe("/app/message", new StompFrameHandler() {
+
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return Message.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                latch.countDown();
+            }
+        });
+
+        await()
+                .atMost(1, SECONDS)
+                .untilAsserted(() -> assertEquals(1, latch.getCount()));
     }
 }

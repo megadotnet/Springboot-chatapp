@@ -18,7 +18,7 @@ export const ChatPage = () => {
     setMessages((prev) => [temp, ...prev]);
   }
   function connect() {
-    let socket = new SockJS("http://localhost:8080/ws");
+      let socket = new SockJS("/back/ws");
 
     stompClient = Stomp.over(socket);
 
@@ -26,13 +26,13 @@ export const ChatPage = () => {
       console.log("Connected : " + frame);
 
       //subscribe
-      stompClient.subscribe("/topic/return-to", function (response) {
+      stompClient.subscribe("/back/topic/return-to", function (response) {
         showMessage(JSON.parse(response.body));
       });
 
       //subscirbe private message
       stompClient.subscribe(
-        `/user/${localStorage.getItem("chat-username")}/private`,
+        `/back/user/${localStorage.getItem("chat-username")}/private`,
         onPrivateMessage
       );
     });
@@ -44,7 +44,7 @@ export const ChatPage = () => {
 
   const sendMessage = () => {
     stompClient.send(
-      "/app/message",
+      "/back/app/message",
       {},
       JSON.stringify({
         senderName: localStorage.getItem("chat-username"),

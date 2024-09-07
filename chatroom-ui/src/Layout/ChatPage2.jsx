@@ -98,7 +98,7 @@ export const ChatPage2 = () => {
   };
 
   const connect = () => {
-    let sock = new SockJS("http://localhost:8080/ws");
+      let sock = new SockJS("/back/ws");
     stompClient = over(sock);
     stompClient.connect({}, onConnect, onError);
   };
@@ -132,7 +132,7 @@ export const ChatPage2 = () => {
   const sendMessage = () => {
     if (message.trim().length > 0 || message.media != null) {
       stompClient.send(
-        "/app/message",
+        "/back/app/message",
         {},
         JSON.stringify({
           senderName: username,
@@ -162,7 +162,7 @@ export const ChatPage2 = () => {
         setPrivateChats(new Map(privateChats));
 
         stompClient.send(
-          "/app/private-message",
+          "/back/app/private-message",
           {},
           JSON.stringify(chatMessage)
         );

@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ChatRoomWebSocketTest {
 
     // 定义WebSocket的主题路径
-    static final String WEBSOCKET_TOPIC = "/chatroom";
+    static final String WEBSOCKET_TOPIC = "/chatroom/public";
 
     // 使用阻塞队列来接收WebSocket消息
     BlockingQueue<String> blockingQueue;
@@ -95,7 +95,7 @@ class ChatRoomWebSocketTest {
     /**
      * 自定义的StompFrameHandler实现，用于处理接收到的帧
      */
-    class DefaultStompFrameHandler implements StompFrameHandler {
+     class DefaultStompFrameHandler implements StompFrameHandler {
         @Override
         public Type getPayloadType(StompHeaders stompHeaders) {
             return byte[].class;

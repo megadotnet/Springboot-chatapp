@@ -2,6 +2,7 @@ package com.chatroomserver.chatroonbackend.controller;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -85,9 +86,9 @@ public class ChatControllerTest {
         String jsonMessage = objectMapper.writeValueAsString(message);
 
         // Send the message to the public chatroom
-        session.send("/app/message", jsonMessage.getBytes()); // Send as byte array
+        var result=session.send("/app/message", jsonMessage.getBytes()); // Send as byte array
 
-
+        assertNotNull(result);
         // Verify that the message was sent to the public chatroom
         //verify(simpMessagingTemplate).convertAndSend("/chatroom/public", message);
     }
@@ -106,8 +107,8 @@ public class ChatControllerTest {
         String jsonMessage = objectMapper.writeValueAsString(message);
 
         // Send the private message
-        session.send("/app/private-message", jsonMessage.getBytes()); // Send as byte array
-
+        var result= session.send("/app/private-message", jsonMessage.getBytes()); // Send as byte array
+        assertNotNull(result);
         // Verify that the private message was sent to the correct user
         //verify(simpMessagingTemplate).convertAndSendToUser(eq(message.getMessage()), "/private", message.getMessage());
     }
@@ -116,31 +117,44 @@ public class ChatControllerTest {
     @Disabled
     public void verifyGreetingIsReceived() throws Exception {
 
+        // 创建并配置消息对象
+        Message message = new Message();
+        message.setMessage("This is testPrivateMessage");
+        message.setSenderName("User2");
+        message.setReceiverName("User1");
+        // 将Message对象转换为JSON字符串
+        String jsonMessage = objectMapper.writeValueAsString(message);
+
         BlockingQueue<String> blockingQueue = new ArrayBlockingQueue<>(1);
 
-        webSocketStompClient.setMessageConverter(new StringMessageConverter());
         String url = "ws://localhost:" + port + "/ws";
         StompSession session = webSocketStompClient
                 .connect(url, new StompSessionHandlerAdapter() {})
                 .get(1, SECONDS);
 
-        session.subscribe("/app/message", new StompFrameHandler() {
+        session.subscribe("/chatroom/public", new StompFrameHandler() {
 
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return String.class;
+                return Message.class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                blockingQueue.add((String) payload);
+                try {
+                    // Convert the payload to a JSON string and add it to the BlockingQueue
+                    blockingQueue.offer(objectMapper.writeValueAsString(payload));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
-        session.send("/chatroom/public", "Mike");
+        session.send("/app/message", jsonMessage.getBytes());
 
-        await().atMost(1, SECONDS)
-                .untilAsserted(() -> assertEquals("Hello, Mike!", blockingQueue.poll()));
+        await()
+                .atMost(1, SECONDS)
+                .untilAsserted(() -> assertEquals(jsonMessage, blockingQueue.poll()));
     }
 
     @Test
@@ -155,7 +169,7 @@ public class ChatControllerTest {
                 })
                 .get(1, SECONDS);
 
-        session.subscribe("/app/message", new StompFrameHandler() {
+        session.subscribe("/chatroom", new StompFrameHandler() {
 
             @Override
             public Type getPayloadType(StompHeaders headers) {

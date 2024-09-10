@@ -11,13 +11,14 @@ export const ChatPage2 = () => {
     history.push("/login");
   }
 
-  const [username] = useState(localStorage.getItem("chat-username"));
-  const [receiver, setReceiver] = useState("");
-  const [message, setMessage] = useState("");
-  const [media, setMedia] = useState("");
-  const [tab, setTab] = useState("CHATROOM");
-  const [publicChats, setPublicChats] = useState([]);
-  const [privateChats, setPrivateChats] = useState(new Map());
+  // 从本地存储获取用户名并设置为不可变状态
+  const [username] = useState(localStorage.getItem('chat-username'));
+  const [receiver, setReceiver] = useState(""); // 接收者名称
+  const [message, setMessage] = useState(""); // 输入的消息
+  const [media, setMedia] = useState(""); // 媒体文件的base64编码
+  const [tab, setTab] = useState("CHATROOM"); // 当前激活的聊天选项卡
+  const [publicChats, setPublicChats] = useState([]); // 公共聊天室的消息列表
+  const [privateChats, setPrivateChats] = useState(new Map()); // 私人聊天消息的映射表
 
   //const data = media.split(";")[0].split("/")[0].split(":")[1];
   //console.log(data);
@@ -97,12 +98,14 @@ export const ChatPage2 = () => {
     stompClient.send("/app/message", {}, JSON.stringify(chatMessage));
   };
 
+  //建立WebSocket连接
   const connect = () => {
       let sock = new SockJS("http://localhost:8080/ws");
     stompClient = over(sock);
     stompClient.connect({}, onConnect, onError);
   };
 
+// 使用useEffect来在组件挂载时自动连接WebSocket
   useEffect(() => {
     connect();
   }, []);
@@ -177,6 +180,7 @@ export const ChatPage2 = () => {
     setTab(name);
   };
 
+//返回React组件结构
   return (
     <div
       className="d-flex justify-content-center align-items-center "

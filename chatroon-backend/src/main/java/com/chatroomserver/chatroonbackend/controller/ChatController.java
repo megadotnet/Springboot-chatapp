@@ -14,13 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 // 使用Spring的Websocket和MVC功能实现消息控制器
 @RestController
-// 使用AllArgsConstructor注解自动生成所有成员变量的构造函数
-@AllArgsConstructor
 @Slf4j
 public class ChatController {
 
-    // 用于发送消息的模板
-    private SimpMessagingTemplate simpMessagingTemplate;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
+    public ChatController(SimpMessagingTemplate simpMessagingTemplate) {
+        this.simpMessagingTemplate = simpMessagingTemplate;
+    }
 
     /**
      * 接收并处理发往"/message"的STOMP消息
@@ -32,7 +33,7 @@ public class ChatController {
     @MessageMapping("/message")
     @SendTo("/chatroom/public")
     public Message receiveMessage(@RequestBody Message message) throws InterruptedException {
-        log.info(message.getMessage());
+        log.info("server side :{}",message.getMessage());
         return message;
     }
 

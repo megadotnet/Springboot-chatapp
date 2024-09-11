@@ -20,7 +20,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 
     /**
@@ -30,8 +32,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
+        // 设置应用程序的消息目的地前缀
         registry.setApplicationDestinationPrefixes("/app");
+
+        // 启用简单消息代理，并设置目的地前缀
         registry.enableSimpleBroker("/chatroom", "/user");
+
         registry.setUserDestinationPrefix("/user");
     }
 

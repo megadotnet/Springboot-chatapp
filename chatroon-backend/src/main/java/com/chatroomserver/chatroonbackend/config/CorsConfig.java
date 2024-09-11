@@ -8,7 +8,7 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- *
+ * CorsConfig
  * @Description
  * @Author peter
  * @Date 2023/4/14 17:47

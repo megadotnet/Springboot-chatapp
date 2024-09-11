@@ -11,6 +11,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 // 使用Spring的Websocket和MVC功能实现消息控制器
 @RestController
@@ -33,7 +34,7 @@ public class ChatController {
     @MessageMapping("/message")
     @SendTo("/chatroom/public")
     public Message receiveMessage(@RequestBody Message message) throws InterruptedException {
-        log.info("server side :{}",message.getMessage());
+        log.info("server side :{}", HtmlUtils.htmlEscape(message.getMessage()));
         return message;
     }
 
@@ -45,7 +46,8 @@ public class ChatController {
      */
     @MessageMapping("/private-message")
     public Message privateMessage(@RequestBody Message message){
-        simpMessagingTemplate.convertAndSendToUser(message.getReceiverName(),"/private",message);
+        simpMessagingTemplate.convertAndSendToUser(HtmlUtils.htmlEscape(message.getReceiverName())
+                ,"/private",message);
         return message;
     }
 

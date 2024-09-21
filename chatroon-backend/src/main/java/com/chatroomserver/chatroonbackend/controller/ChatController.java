@@ -4,11 +4,13 @@ import com.chatroomserver.chatroonbackend.model.Message;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 
 import org.springframework.messaging.handler.annotation.SendTo;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
@@ -49,6 +51,11 @@ public class ChatController {
         simpMessagingTemplate.convertAndSendToUser(HtmlUtils.htmlEscape(message.getReceiverName())
                 ,"/private",message);
         return message;
+    }
+
+    @GetMapping("/send")
+    public ResponseEntity<String> sendMessage(String message){
+        return ResponseEntity.ok(message);
     }
 
 }

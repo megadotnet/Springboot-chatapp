@@ -10,10 +10,13 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
+
+import java.security.Principal;
 
 // 使用Spring的Websocket和MVC功能实现消息控制器
 @RestController
@@ -47,9 +50,10 @@ public class ChatController {
      * @return 返回接收到的消息
      */
     @MessageMapping("/private-message")
-    public Message privateMessage(@RequestBody Message message){
-        simpMessagingTemplate.convertAndSendToUser(HtmlUtils.htmlEscape(message.getReceiverName())
-                ,"/private",message);
+    public Message privateMessage(@RequestBody Message message, Principal principal) {
+        if (!message.getReceiverName().equals(principal.getName())) {
+            throw new AccessDeniedException("无权发送消息给该用户");
+        }
         return message;
     }
 

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatroom Login</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .login-container {
+            max-width: 350px;
+            margin: 100px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="login-container">
+        <h2 class="text-center mb-4">Chatroom Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+        <div id="errorMsg" class="text-danger mt-3" style="display: none;"></div>
+    </div>
+</div>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+$(function() {
+    $('#loginForm').submit(function(e) {
+        e.preventDefault();
+
+        const credentials = {
+            username: $('#username').val(),
+            password: $('#password').val()
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/api/login",
+            contentType: "application/json",
+            data: JSON.stringify(credentials),
+            success: function(response) {
+                localStorage.setItem("chat-token", response.token);
+                localStorage.setItem("chat-username", response.username);
+                window.location.href = "/";
+            },
+            error: function(xhr) {
+                $('#errorMsg').text(xhr.responseJSON?.message || "Login failed").show();
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>

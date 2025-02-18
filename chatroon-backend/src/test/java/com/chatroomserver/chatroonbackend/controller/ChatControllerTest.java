@@ -29,6 +29,7 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -71,6 +72,7 @@ public class ChatControllerTest {
         webSocketStompClient = new WebSocketStompClient(new SockJsClient(transports));
         objectMapper = new ObjectMapper(); // Initialize ObjectMapper
     }
+    @WithMockUser(username = "testUser")
     @Test
     public void testReceiveMessage() throws Exception {
         Message message = new Message();

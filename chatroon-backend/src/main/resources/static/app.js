@@ -33,6 +33,7 @@ function connect() {
         "username": username               // 附加用户标识
     };
 
+    console.log(headers);
     stompClient.connect(headers,
         (frame) => {
             setConnected(true);

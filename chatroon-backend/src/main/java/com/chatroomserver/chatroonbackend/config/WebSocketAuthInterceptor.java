@@ -23,12 +23,12 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
         // 从请求中获取token（示例使用Authorization头）
         String token = request.getHeaders().getFirst("Authorization");
         
-        if (!validateToken(token)) {
-            throw new AuthenticationCredentialsNotFoundException("未授权的连接请求");
-        }
+        //if (!validateToken(token)) {
+         //   throw new AuthenticationCredentialsNotFoundException("未授权的连接请求");
+        //}
         
         // 将用户信息存入attributes供后续使用
-        attributes.put("user", extractUserFromToken(token));
+        //attributes.put("user", extractUserFromToken(token));
         return true;
     }
 

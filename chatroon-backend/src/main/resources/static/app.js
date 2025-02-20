@@ -53,10 +53,9 @@ function connect() {
         },
         (error) => {
             console.error('connect failed', error);
-            alert("认证过期，请重新登录");
-            //disconnect();
-            //localStorage.clear(); // 清理失效凭证
-            //window.location.reload();
+            disconnect();
+            localStorage.clear(); // 清理失效凭证
+            window.location.reload();
         }
     );
 }

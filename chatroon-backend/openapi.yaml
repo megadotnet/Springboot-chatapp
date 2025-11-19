@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: Chatroom API
+  version: 1.0.0
+  description: API documentation for the Chatroom application.
+servers:
+  - url: http://localhost:8080
+    description: Local server
+paths:
+  /send:
+    get:
+      summary: Send a message
+      description: Sends a message to the server.
+      parameters:
+        - name: message
+          in: query
+          required: true
+          description: The message to send.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Message sent successfully.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /message:
+    post:
+      summary: Receive a public message (WebSocket)
+      description: >
+        Receives a public message via a WebSocket connection using the STOMP protocol.
+        This is not a standard HTTP endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+      responses:
+        '200':
+          description: Message received successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  /private-message:
+    post:
+      summary: Receive a private message (WebSocket)
+      description: >
+        Receives a private message via a WebSocket connection using the STOMP protocol.
+        This is not a standard HTTP endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+      responses:
+        '200':
+          description: Message received successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+components:
+  schemas:
+    Message:
+      type: object
+      properties:
+        senderName:
+          type: string
+          description: The name of the sender.
+        receiverName:
+          type: string
+          description: The name of the receiver.
+        message:
+          type: string
+          description: The content of the message.
+        media:
+          type: string
+          description: The path to the media file.
+        status:
+          type: string
+          enum:
+            - JOIN
+            - MESSAGE
+            - LEAVE
+          description: The status of the message.
+        mediaType:
+          type: string
+          description: The type of the media file.

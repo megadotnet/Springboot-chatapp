@@ -37,6 +37,7 @@ public class ChatController {
     @SendTo("/chatroom/public")
     public Message receiveMessage(@RequestBody Message message) throws InterruptedException {
         log.info("server side :{}", HtmlUtils.htmlEscape(message.getMessage()));
+        message.setMessage(HtmlUtils.htmlEscape(message.getMessage()));
         return message;
     }
 
@@ -48,6 +49,7 @@ public class ChatController {
      */
     @MessageMapping("/private-message")
     public Message privateMessage(@RequestBody Message message){
+        message.setMessage(HtmlUtils.htmlEscape(message.getMessage()));
         simpMessagingTemplate.convertAndSendToUser(HtmlUtils.htmlEscape(message.getReceiverName())
                 ,"/private",message);
         return message;

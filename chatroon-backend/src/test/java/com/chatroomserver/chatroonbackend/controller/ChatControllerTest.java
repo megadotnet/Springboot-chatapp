@@ -49,141 +49,35 @@ import static org.awaitility.Awaitility.await;
 /**
  * Unit tests for the ChatController class.
  */
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith({MockitoExtension.class})
 public class ChatControllerTest {
 
-    @MockBean
+    @Mock
     private SimpMessagingTemplate simpMessagingTemplate;
 
-
-    private WebSocketStompClient webSocketStompClient;
-
-    @LocalServerPort // Inject the port number
-    private int port;
-
-    private ObjectMapper objectMapper;
-
-    @BeforeEach
-    public void setup() {
-        // Initialize the WebSocketStompClient
-        List<Transport> transports = Collections.singletonList(new WebSocketTransport(new StandardWebSocketClient()));
-        webSocketStompClient = new WebSocketStompClient(new SockJsClient(transports));
-        objectMapper = new ObjectMapper(); // Initialize ObjectMapper
-    }
+    @InjectMocks
+    private ChatController chatController;
     @Test
-    public void testReceiveMessage() throws Exception {
+    public void testReceiveMessage_withXssAttempt() throws Exception {
         Message message = new Message();
-        message.setMessage("This is test");
+        message.setMessage("<script>alert('XSS')</script>");
         message.setSenderName("User2");
         message.setReceiverName("User1");
 
-        // Connect to the WebSocket server on the dynamically assigned port
-        String url = "ws://localhost:" + port + "/ws";
-        StompSession session = webSocketStompClient.connect(url, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
+        Message result = chatController.receiveMessage(message);
 
-        // Convert the Message object to JSON
-        String jsonMessage = objectMapper.writeValueAsString(message);
-
-        // Send the message to the public chatroom
-        var result=session.send("/app/message", jsonMessage.getBytes()); // Send as byte array
-
-        assertNotNull(result);
-        // Verify that the message was sent to the public chatroom
-        //verify(simpMessagingTemplate).convertAndSend("/chatroom/public", message);
+        assertEquals("&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;", result.getMessage());
     }
 
     @Test
-    public void testPrivateMessage() throws Exception {
+    public void testPrivateMessage_withXssAttempt() throws Exception {
         Message message = new Message();
-        message.setMessage("This is testPrivateMessage");
+        message.setMessage("<script>alert('XSS')</script>");
         message.setSenderName("User2");
         message.setReceiverName("User1");
-        // Connect to the WebSocket server on the dynamically assigned port
-        String url = "ws://localhost:" + port + "/ws";
-        StompSession session = webSocketStompClient.connect(url, new StompSessionHandlerAdapter() {}).get();
 
-        // Convert the Message object to JSON
-        String jsonMessage = objectMapper.writeValueAsString(message);
+        Message result = chatController.privateMessage(message);
 
-        // Send the private message
-        var result= session.send("/app/private-message", jsonMessage.getBytes()); // Send as byte array
-        assertNotNull(result);
-        // Verify that the private message was sent to the correct user
-        //verify(simpMessagingTemplate).convertAndSendToUser(eq(message.getMessage()), "/private", message.getMessage());
-    }
-
-    @Test
-    @Disabled
-    public void verifyGreetingIsReceived() throws Exception {
-
-        // 创建并配置消息对象
-        Message message = new Message();
-        message.setMessage("This is testPrivateMessage");
-        message.setSenderName("User2");
-        message.setReceiverName("User1");
-        // 将Message对象转换为JSON字符串
-        String jsonMessage = objectMapper.writeValueAsString(message);
-
-        BlockingQueue<String> blockingQueue = new ArrayBlockingQueue<>(1);
-
-        String url = "ws://localhost:" + port + "/ws";
-        StompSession session = webSocketStompClient
-                .connect(url, new StompSessionHandlerAdapter() {})
-                .get(1, SECONDS);
-
-        session.subscribe("/chatroom/public", new StompFrameHandler() {
-
-            @Override
-            public Type getPayloadType(StompHeaders headers) {
-                return Message.class;
-            }
-
-            @Override
-            public void handleFrame(StompHeaders headers, Object payload) {
-                try {
-                    // Convert the payload to a JSON string and add it to the BlockingQueue
-                    blockingQueue.offer(objectMapper.writeValueAsString(payload));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        session.send("/app/message", jsonMessage.getBytes());
-
-        await()
-                .atMost(1, SECONDS)
-                .untilAsserted(() -> assertEquals(jsonMessage, blockingQueue.poll()));
-    }
-
-    @Test
-    void verifyWelcomeMessageIsSent() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
-        String url = "ws://localhost:" + port + "/ws";
-
-        StompSession session = webSocketStompClient
-                .connect(url, new StompSessionHandlerAdapter() {
-                })
-                .get(1, SECONDS);
-
-        session.subscribe("/chatroom", new StompFrameHandler() {
-
-            @Override
-            public Type getPayloadType(StompHeaders headers) {
-                return Message.class;
-            }
-
-            @Override
-            public void handleFrame(StompHeaders headers, Object payload) {
-                latch.countDown();
-            }
-        });
-
-        await()
-                .atMost(1, SECONDS)
-                .untilAsserted(() -> assertEquals(1, latch.getCount()));
+        assertEquals("&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;", result.getMessage());
     }
 }

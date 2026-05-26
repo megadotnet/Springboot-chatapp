@@ -65,4 +65,14 @@ class ChatControllerDiffblueTest {
                 Mockito.<Object>any());
         assertSame(message, actualPrivateMessageResult);
     }
+
+    /**
+     * Method under test: {@link ChatController#sendMessage(String)}
+     */
+    @Test
+    void testSendMessage() {
+        org.springframework.http.ResponseEntity<String> result = chatController.sendMessage("Hello API");
+        org.junit.jupiter.api.Assertions.assertEquals(200, result.getStatusCodeValue());
+        org.junit.jupiter.api.Assertions.assertEquals("Hello API", result.getBody());
+    }
 }

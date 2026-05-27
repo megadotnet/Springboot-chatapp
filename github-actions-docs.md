@@ -9,7 +9,7 @@
 ### 1. 前端 (`chatroom-ui`)
 - **核心框架**: React (使用 Vite 构建)
 - **依赖管理**: npm (`package.json`, `package-lock.json`)
-- **Node.js 版本**: v18 及以上
+- **Node.js 版本**: v20 及以上
 - **代码规范校验**: ESLint
 - **单元测试**: Vitest
 - **构建产物路径**: `chatroom-ui/dist/`
@@ -68,7 +68,7 @@ on:
 #### 核心步骤：
 1. **获取源码 (Checkout Code)**: 检出当前仓库代码。
 2. **环境配置 (Setup Node.js)**:
-   - 使用 `actions/setup-node` 配置 Node.js (v18) 运行环境。
+   - 使用 `actions/setup-node` 配置 Node.js (v20) 运行环境。
    - 启用基于 `package-lock.json` 的 `npm` 依赖缓存以加快安装速度。
 3. **依赖安装 (Install Frontend Dependencies)**:
    - 运行 `npm install` 安装所有前端所需的依赖包。

@@ -66,7 +66,6 @@ class ChatControllerDiffblueTest {
         assertSame(message, actualPrivateMessageResult);
     }
 
-
     /**
      * Method under test: {@link ChatController#sendMessage(String)}
      */
@@ -76,5 +75,4 @@ class ChatControllerDiffblueTest {
         org.junit.jupiter.api.Assertions.assertEquals(200, result.getStatusCodeValue());
         org.junit.jupiter.api.Assertions.assertEquals("Hello API", result.getBody());
     }
-
 }

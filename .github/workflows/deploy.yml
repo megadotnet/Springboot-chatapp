@@ -18,7 +18,7 @@ jobs:
       - name: UI Security Scan
         working-directory: ./chatroom-ui
         run: |
-          npm ci
+          npm install
           # Dependency vulnerability scanning (we ignore errors here to let build pass for demo, or audit-level high)
           npm audit --audit-level high || true
       - name: Static Security Scan
@@ -47,7 +47,7 @@ jobs:
       - name: Run UI Tests
         working-directory: ./chatroom-ui
         run: |
-          npm ci
+          npm install
           npm run build
 
   build:

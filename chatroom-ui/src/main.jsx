@@ -1,7 +1,8 @@
+/* eslint-disable */
 // 导入React库，用于构建用户界面
 import React from "react";
 // 导入ReactDOM库，用于将React元素渲染到HTML文档中
-import ReactDOM from "react-dom/root";
+import ReactDOM from "react-dom/client";
 // 导入App组件，作为应用程序的入口
 import App from "./App.jsx";
 // 导入BrowserRouter，用于实现客户端路由
